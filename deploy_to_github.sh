@@ -2,8 +2,16 @@
 set -e
 
 # Configuration
-REPO_URL="https://github.com/guyronhuji/SJR_Data.git"
+REPO_HOST="github.com/guyronhuji/SJR_Data.git"
 BRANCH="main"
+
+if [ -n "$GITHUB_TOKEN" ]; then
+    echo "Using provided GITHUB_TOKEN for authentication."
+    REPO_URL="https://oauth2:$GITHUB_TOKEN@$REPO_HOST"
+else
+    echo "GITHUB_TOKEN not set. Using standard HTTPS URL (requires manual login or credential helper)."
+    REPO_URL="https://$REPO_HOST"
+fi
 
 echo "Using repository: $REPO_URL"
 
