@@ -1,0 +1,21 @@
+# Environment
+.venv/
+env/
+venv/
+__pycache__/
+*.py[cod]
+
+# Distribution / Build
+dist/
+build/
+*.spec
+
+# Logs and Temporary files
+*.log
+*.tmp
+temp_sjr_*.xlsx
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

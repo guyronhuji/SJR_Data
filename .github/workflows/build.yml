@@ -1,0 +1,51 @@
+name: Build macOS App
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    - name: Install dependencies
+      run: |
+        source $HOME/.local/bin/env
+        uv venv
+        uv pip install -r requirements.txt
+        source .venv/bin/activate
+        playwright install chromium
+
+    - name: Build with PyInstaller
+      run: |
+        source $HOME/.local/bin/env
+        source .venv/bin/activate
+        pyinstaller --noconfirm --onedir --windowed --clean \
+          --collect-all customtkinter \
+          --collect-all playwright \
+          --name "SJR_Scraper" \
+          sjr_gui.py
+
+    - name: Zip Application Bundle
+      run: |
+        cd dist
+        zip -r SJR_Scraper_macOS.zip SJR_Scraper.app
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SJR_Scraper_macOS
+        path: dist/SJR_Scraper_macOS.zip
