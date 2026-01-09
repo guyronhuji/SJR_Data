@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
+# Check for ~/.env and source it
+if [ -f "$HOME/.env" ]; then
+    echo "Loading environment from ~/.env"
+    set -a
+    source "$HOME/.env"
+    set +a
+fi
+
 # Configuration
 REPO_HOST="github.com/guyronhuji/SJR_Data.git"
 BRANCH="main"
