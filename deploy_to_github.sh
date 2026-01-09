@@ -5,12 +5,22 @@ set -e
 REPO_HOST="github.com/guyronhuji/SJR_Data.git"
 BRANCH="main"
 
-if [ -n "$GITHUB_TOKEN" ]; then
-    echo "Using provided GITHUB_TOKEN for authentication."
-    REPO_URL="https://oauth2:$GITHUB_TOKEN@$REPO_HOST"
+if [ -z "$GITHUB_TOKEN" ]; then
+    echo "GITHUB_TOKEN is not set."
+    echo "To avoid manual login issues, please enter your GitHub Personal Access Token."
+    echo "You can generate one here: https://github.com/settings/tokens (Select 'repo' scope)"
+    read -sp "Token: " GITHUB_TOKEN
+    echo ""
+    
+    if [ -z "$GITHUB_TOKEN" ]; then
+        echo "No token provided. Attempting standard HTTPS (may fail if you don't have a credential helper)..."
+        REPO_URL="https://$REPO_HOST"
+    else
+         REPO_URL="https://oauth2:$GITHUB_TOKEN@$REPO_HOST"
+    fi
 else
-    echo "GITHUB_TOKEN not set. Using standard HTTPS URL (requires manual login or credential helper)."
-    REPO_URL="https://$REPO_HOST"
+    echo "Using provided GITHUB_TOKEN environment variable."
+    REPO_URL="https://oauth2:$GITHUB_TOKEN@$REPO_HOST"
 fi
 
 echo "Using repository: $REPO_URL"
