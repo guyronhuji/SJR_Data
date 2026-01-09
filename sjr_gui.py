@@ -210,8 +210,16 @@ if __name__ == "__main__":
         
         if getattr(sys, 'frozen', False):
             logging.info("Running in frozen mode.")
-            # Point to local user cache for browsers
-            browser_path = os.path.join(os.path.expanduser("~"), "Library", "Caches", "ms-playwright")
+            
+            # Point to local user cache for browsers based on OS
+            if sys.platform == "darwin":
+                browser_path = os.path.join(os.path.expanduser("~"), "Library", "Caches", "ms-playwright")
+            elif sys.platform == "win32":
+                 browser_path = os.path.join(os.path.expanduser("~"), "AppData", "Local", "ms-playwright")
+            else:
+                 # Linux fallback
+                 browser_path = os.path.join(os.path.expanduser("~"), ".cache", "ms-playwright")
+                 
             os.environ["PLAYWRIGHT_BROWSERS_PATH"] = browser_path
             logging.info(f"Set PLAYWRIGHT_BROWSERS_PATH to: {browser_path}")
             

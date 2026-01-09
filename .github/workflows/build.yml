@@ -1,4 +1,4 @@
-name: Build macOS App
+name: Build App
 
 on:
   push:
@@ -9,7 +9,11 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v4
@@ -26,25 +30,36 @@ jobs:
       run: |
         uv venv
         uv pip install -r requirements.txt
-        source .venv/bin/activate
-        playwright install chromium
+        uv run playwright install chromium
 
     - name: Build with PyInstaller
       run: |
-        source .venv/bin/activate
-        pyinstaller --noconfirm --onedir --windowed --clean \
-          --collect-all customtkinter \
-          --collect-all playwright \
-          --name "SJR_Scraper" \
-          sjr_gui.py
+        uv run pyinstaller --noconfirm --onedir --windowed --clean --collect-all customtkinter --collect-all playwright --name "SJR_Scraper" sjr_gui.py
 
-    - name: Zip Application Bundle
+    # MacOS Packaging
+    - name: Zip Mac Bundle
+      if: matrix.os == 'macos-latest'
       run: |
         cd dist
         zip -r SJR_Scraper_macOS.zip SJR_Scraper.app
 
-    - name: Upload Artifact
+    # Windows Packaging
+    - name: Zip Windows Bundle
+      if: matrix.os == 'windows-latest'
+      run: |
+        cd dist
+        Compress-Archive -Path SJR_Scraper -DestinationPath SJR_Scraper_Windows.zip
+
+    - name: Upload Artifact (MacOS)
+      if: matrix.os == 'macos-latest'
       uses: actions/upload-artifact@v4
       with:
         name: SJR_Scraper_macOS
         path: dist/SJR_Scraper_macOS.zip
+
+    - name: Upload Artifact (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: SJR_Scraper_Windows
+        path: dist/SJR_Scraper_Windows.zip
